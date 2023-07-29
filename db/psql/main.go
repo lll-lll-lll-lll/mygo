@@ -10,7 +10,7 @@ import (
 
 func main() {
 	connStr := "postgres://mygo-postgres:mygo-postgres@localhost/mygo-postgresdb?sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	_, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
