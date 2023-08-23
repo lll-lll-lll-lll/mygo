@@ -14,6 +14,5 @@ create table if not exists profiles(
 
 insert into users (id, name) values(1, 'test1');
 insert into users (id, name) values(2,'test2');
-insert into users (name) values('test3');
 insert into profiles (user_name) values('test_user_1');
 insert into profiles (user_name) values('test_user_2');

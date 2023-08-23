@@ -10,9 +10,32 @@ import (
 
 func main() {
 	connStr := "postgres://mygo-postgres:mygo-postgres@localhost/mygo-postgresdb?sslmode=disable"
-	_, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
+	}
+	getTableName(db)
+
+}
+
+func getTableName(db *sql.DB) {
+	rows, err := db.Query(`
+	SELECT table_name
+	FROM information_schema.tables
+	WHERE table_schema = 'public'
+	ORDER BY table_name;
+`)
+	if err != nil {
+		log.Println(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var clmName string
+		err := rows.Scan(&clmName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(clmName)
 	}
 
 }
@@ -54,18 +77,22 @@ func getColumnType(db *sql.DB) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	types, err := rows.ColumnTypes()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, t := range types {
-		fmt.Println(t.ScanType().String())
-	}
+	// ここのデータはクエリのselect内の文字列に関すること
+	// types, err := rows.ColumnTypes()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// for _, t := range types {
+	// 	fmt.Println(t.Name())
+	// 	fmt.Println(t.ScanType())
+	// 	fmt.Println("end")
+	// }
 	columns := make([]struct {
 		ColumnName string
 		DataType   string
 	}, 0)
 
+	// 実際のカラムごとのタイプを知れる
 	for rows.Next() {
 		var column struct {
 			ColumnName string
@@ -87,22 +114,24 @@ func getColumnType(db *sql.DB) {
 	for _, column := range columns {
 		fmt.Println("Column Name:", column.ColumnName)
 		fmt.Println("Data Type:", column.DataType)
+		fmt.Println("------")
 	}
 
 }
 
-func columnCheck(db *sql.DB) {
-	tableName := "profiles"
-	rows, err := db.Query(fmt.Sprintf("select user_name from %s;", tableName))
-	if err != nil {
-		log.Fatal(err)
-	}
-	types, err := rows.Columns()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, t := range types {
-		fmt.Println(t)
-		fmt.Println("")
-	}
-}
+// func columnCheck(db *sql.DB) {
+// 	tableName := "profiles"
+// 	rows, err := db.Query(fmt.Sprintf("select user_name from %s;", tableName))
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	types, err := rows.Columns()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	for _, t := range types {
+// 		fmt.Println(t)
+// 		fmt.Println("")
+// 	}
+
+// }
